@@ -4,5 +4,10 @@
   "buildCommand": "npm run build",
   "installCommand": "npm ci",
   "devCommand": "npm run dev",
-  "regions": ["hnd1"]
+  "regions": ["hnd1"],
+  "functions": {
+    "app/api/transcriptions/route.ts": {
+      "maxDuration": 60
+    }
+  }
 }

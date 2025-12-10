@@ -63,14 +63,42 @@ export async function DELETE(
       )
     }
 
-    // 削除
-    const { error: dbError } = await supabase
+    // まずレコードを取得してstorage_pathを確認
+    const { data: transcription, error: fetchError } = await supabase
+      .from('transcriptions')
+      .select('storage_path')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError || !transcription) {
+      return NextResponse.json(
+        { error: 'Transcription not found' },
+        { status: 404 }
+      )
+    }
+
+    // Storageファイルを削除（存在する場合）
+    if (transcription.storage_path) {
+      const { error: storageError } = await supabase.storage
+        .from('transcriptions')
+        .remove([transcription.storage_path])
+
+      if (storageError) {
+        console.error('Storage delete error:', storageError)
+        // Storageの削除に失敗してもDBは削除を続行
+      }
+    }
+
+    // DBレコードを削除
+    const { error: deleteError } = await supabase
       .from('transcriptions')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
-    if (dbError) {
-      console.error('Delete error:', dbError)
+    if (deleteError) {
+      console.error('Database delete error:', deleteError)
       return NextResponse.json(
         { error: 'Failed to delete transcription' },
         { status: 500 }

@@ -10,21 +10,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// 許可するファイルタイプ
-const ALLOWED_TYPES = [
-  'audio/mpeg',
-  'audio/mp3',
-  'audio/wav',
-  'audio/wave',
-  'audio/x-wav',
-  'audio/mp4',
-  'audio/m4a',
-  'audio/x-m4a',
-  'video/mp4',
-  'video/webm',
-  'audio/webm',
-]
-
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
 
 // POST: 文字起こし実行
@@ -43,37 +28,53 @@ export async function POST(request: NextRequest) {
     }
     console.log('Auth success in POST:', { userId: user.id })
 
-    // FormDataからファイルを取得
-    const formData = await request.formData()
-    const file = formData.get('file') as File | null
-    const title = formData.get('title') as string || 'Untitled'
+    // JSONボディから情報を取得
+    const body = await request.json()
+    const { storage_path, title, original_filename, file_size_bytes } = body
 
-    if (!file) {
+    if (!storage_path) {
       return NextResponse.json(
-        { error: 'No file provided' },
+        { error: 'No storage_path provided' },
         { status: 400 }
       )
     }
 
-    // ファイルバリデーション
-    if (file.size > MAX_FILE_SIZE) {
+    // storage_pathがユーザーのものか確認
+    if (!storage_path.startsWith(`${user.id}/`)) {
+      return NextResponse.json(
+        { error: 'Unauthorized access to file' },
+        { status: 403 }
+      )
+    }
+
+    // ファイルサイズチェック
+    if (file_size_bytes && file_size_bytes > MAX_FILE_SIZE) {
       return NextResponse.json(
         { error: 'File size must be less than 25MB' },
         { status: 400 }
       )
     }
 
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    // Supabase Storageからファイルをダウンロード
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from('transcriptions')
+      .download(storage_path)
+
+    if (downloadError || !fileData) {
+      console.error('Storage download error:', downloadError)
       return NextResponse.json(
-        { error: 'Invalid file type. Allowed: MP3, WAV, M4A, MP4, WebM' },
-        { status: 400 }
+        { error: 'Failed to download file from storage' },
+        { status: 500 }
       )
     }
 
-    // ファイルをBufferに変換してOpenAI用に整形
-    const arrayBuffer = await file.arrayBuffer()
+    // BlobをBufferに変換
+    const arrayBuffer = await fileData.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-    const openaiFile = await toFile(buffer, file.name, { type: file.type })
+
+    // ファイル名を取得（パスの最後の部分）
+    const filename = storage_path.split('/').pop() || 'audio.mp3'
+    const openaiFile = await toFile(buffer, filename)
 
     // OpenAI Whisper API で文字起こし
     const transcription = await openai.audio.transcriptions.create({
@@ -90,17 +91,19 @@ export async function POST(request: NextRequest) {
       text: seg.text,
     })) || []
 
-    // Supabaseに保存
+    // Supabaseに保存（storage_pathを含める）
     const { data: savedTranscription, error: dbError } = await supabase
       .from('transcriptions')
       .insert({
         user_id: user.id,
-        title: title,
-        original_filename: file.name,
+        title: title || 'Untitled',
+        original_filename: original_filename || filename,
+        file_size_bytes: file_size_bytes || buffer.length,
         text: transcription.text,
         segments: segments,
         duration_seconds: transcription.duration,
         language: transcription.language,
+        storage_path: storage_path,
       })
       .select()
       .single()

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 type TranscriptionResult = {
   text: string
@@ -79,20 +80,49 @@ export default function TranscribePage() {
     setResult(null)
 
     try {
-      // FormDataでファイルを送信
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('title', file.name.replace(/\.[^/.]+$/, ''))
+      const supabase = createClient()
+
+      // 認証ユーザーを取得
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        throw new Error('ログインが必要です')
+      }
 
       setProgress(10)
 
-      // 内部API Routeを使用（認証はCookieで自動処理）
+      // 一時的なIDを生成（後でDBのIDに置き換え可能）
+      const tempId = crypto.randomUUID()
+      const storagePath = `${user.id}/${tempId}/${file.name}`
+
+      // Supabase Storageにアップロード
+      const { error: uploadError } = await supabase.storage
+        .from('transcriptions')
+        .upload(storagePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (uploadError) {
+        throw new Error(`アップロードエラー: ${uploadError.message}`)
+      }
+
+      setProgress(40)
+
+      // API Routeにstorage_pathを送信
       const response = await fetch('/api/transcriptions', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          storage_path: storagePath,
+          title: file.name.replace(/\.[^/.]+$/, ''),
+          original_filename: file.name,
+          file_size_bytes: file.size,
+        }),
       })
 
-      setProgress(50)
+      setProgress(70)
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))

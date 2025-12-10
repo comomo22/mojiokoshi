@@ -72,29 +72,29 @@ export default function TranscriptionDetail({ transcription }: Props) {
   return (
     <div className="space-y-6">
       {/* メタ情報 */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+      <div className="bg-card rounded-xl shadow p-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">ファイル名</p>
-            <p className="font-medium text-gray-900 dark:text-white truncate">
+            <p className="text-sm text-text-muted">ファイル名</p>
+            <p className="font-medium text-foreground truncate">
               {transcription.original_filename}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">長さ</p>
-            <p className="font-medium text-gray-900 dark:text-white">
+            <p className="text-sm text-text-muted">長さ</p>
+            <p className="font-medium text-foreground">
               {formatDuration(transcription.duration_seconds)}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">言語</p>
-            <p className="font-medium text-gray-900 dark:text-white uppercase">
+            <p className="text-sm text-text-muted">言語</p>
+            <p className="font-medium text-foreground uppercase">
               {transcription.language || '-'}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">作成日時</p>
-            <p className="font-medium text-gray-900 dark:text-white">
+            <p className="text-sm text-text-muted">作成日時</p>
+            <p className="font-medium text-foreground">
               {formatDate(transcription.created_at)}
             </p>
           </div>
@@ -102,29 +102,29 @@ export default function TranscriptionDetail({ transcription }: Props) {
       </div>
 
       {/* テキスト */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+      <div className="bg-card rounded-xl shadow">
+        <div className="p-4 border-b border-divider flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-foreground">
             文字起こしテキスト
           </h2>
           <div className="flex gap-2">
             {transcription.segments && transcription.segments.length > 0 && (
               <button
                 onClick={() => setShowSegments(!showSegments)}
-                className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                className="px-4 py-2 text-sm bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary-hover transition-colors"
               >
                 {showSegments ? 'テキスト表示' : 'タイムスタンプ表示'}
               </button>
             )}
             <button
               onClick={handleCopy}
-              className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+              className="px-4 py-2 text-sm bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary-hover transition-colors"
             >
               {copied ? 'コピーしました!' : 'コピー'}
             </button>
             <button
               onClick={handleDownload}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors"
             >
               ダウンロード
             </button>
@@ -136,16 +136,16 @@ export default function TranscriptionDetail({ transcription }: Props) {
             <div className="space-y-3 max-h-[600px] overflow-y-auto">
               {transcription.segments.map((segment, index) => (
                 <div key={index} className="flex gap-4">
-                  <span className="text-sm text-blue-500 font-mono flex-shrink-0 w-24">
+                  <span className="text-sm text-text-muted font-mono flex-shrink-0 w-24">
                     {formatTimestamp(segment.start)} - {formatTimestamp(segment.end)}
                   </span>
-                  <p className="text-gray-800 dark:text-gray-200">{segment.text}</p>
+                  <p className="text-foreground">{segment.text}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 max-h-[600px] overflow-y-auto">
-              <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 leading-relaxed">
+            <div className="bg-secondary rounded-lg p-4 max-h-[600px] overflow-y-auto">
+              <p className="whitespace-pre-wrap text-foreground leading-relaxed">
                 {transcription.text}
               </p>
             </div>

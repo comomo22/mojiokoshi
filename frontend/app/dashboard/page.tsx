@@ -21,14 +21,14 @@ export default async function DashboardPage() {
     .limit(50)
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 shadow">
+    <div className="min-h-screen bg-secondary">
+      <header className="bg-card shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Whisper Web</h1>
+          <h1 className="text-2xl font-bold text-foreground">Whisper Web</h1>
           <div className="flex items-center gap-4">
-            <span className="text-gray-600 dark:text-gray-400">{user.email}</span>
+            <span className="text-text-muted">{user.email}</span>
             <form action="/auth/signout" method="post">
-              <button className="px-4 py-2 text-sm bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">
+              <button className="px-4 py-2 text-sm bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary-hover transition-colors">
                 ログアウト
               </button>
             </form>
@@ -38,10 +38,10 @@ export default async function DashboardPage() {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">文字起こし履歴</h2>
+          <h2 className="text-xl font-semibold text-foreground">文字起こし履歴</h2>
           <Link
             href="/dashboard/transcribe"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover font-semibold transition-colors"
           >
             + 新規文字起こし
           </Link>

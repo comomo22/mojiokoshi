@@ -2,15 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Design System - Color Tokens
+ * 白・グレー・黒を基調としたシンプルなカラーパレット
+ *
+ * 変更する場合はここのCSS変数を編集するだけでOK
+ */
+
 :root {
+  /* === 基本色 === */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* === プライマリ（主要アクション） === */
+  --primary: #171717;
+  --primary-hover: #404040;
+  --primary-foreground: #ffffff;
+
+  /* === セカンダリ（補助アクション） === */
+  --secondary: #f5f5f5;
+  --secondary-hover: #e5e5e5;
+  --secondary-foreground: #171717;
+
+  /* === アクセント（強調） === */
+  --accent: #525252;
+  --accent-foreground: #ffffff;
+
+  /* === テキスト === */
+  --text-primary: #171717;
+  --text-secondary: #525252;
+  --text-muted: #737373;
+  --text-placeholder: #a3a3a3;
+
+  /* === 境界線・区切り === */
+  --border: #e5e5e5;
+  --border-hover: #d4d4d4;
+  --border-focus: #a3a3a3;
+  --divider: #f5f5f5;
+
+  /* === 入力フィールド === */
+  --input-background: #ffffff;
+  --input-border: #d4d4d4;
+  --input-focus-ring: #a3a3a3;
+
+  /* === カード・パネル === */
+  --card-background: #ffffff;
+  --card-border: #e5e5e5;
+
+  /* === 状態色 === */
+  --success: #22c55e;
+  --success-background: #f0fdf4;
+  --error: #ef4444;
+  --error-background: #fef2f2;
+  --warning: #f59e0b;
+  --warning-background: #fffbeb;
+
+  /* === オーバーレイ === */
+  --overlay: rgba(0, 0, 0, 0.5);
+
+  /* === シャドウ === */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
+/* ダークモード */
 @media (prefers-color-scheme: dark) {
   :root {
+    /* === 基本色 === */
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    /* === プライマリ（主要アクション） === */
+    --primary: #ffffff;
+    --primary-hover: #e5e5e5;
+    --primary-foreground: #171717;
+
+    /* === セカンダリ（補助アクション） === */
+    --secondary: #262626;
+    --secondary-hover: #404040;
+    --secondary-foreground: #ededed;
+
+    /* === アクセント（強調） === */
+    --accent: #a3a3a3;
+    --accent-foreground: #171717;
+
+    /* === テキスト === */
+    --text-primary: #ededed;
+    --text-secondary: #a3a3a3;
+    --text-muted: #737373;
+    --text-placeholder: #525252;
+
+    /* === 境界線・区切り === */
+    --border: #404040;
+    --border-hover: #525252;
+    --border-focus: #737373;
+    --divider: #262626;
+
+    /* === 入力フィールド === */
+    --input-background: #171717;
+    --input-border: #404040;
+    --input-focus-ring: #737373;
+
+    /* === カード・パネル === */
+    --card-background: #171717;
+    --card-border: #262626;
+
+    /* === 状態色 === */
+    --success: #22c55e;
+    --success-background: #052e16;
+    --error: #ef4444;
+    --error-background: #450a0a;
+    --warning: #f59e0b;
+    --warning-background: #451a03;
+
+    /* === オーバーレイ === */
+    --overlay: rgba(0, 0, 0, 0.7);
+
+    /* === シャドウ === */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
   }
 }
 

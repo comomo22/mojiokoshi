@@ -68,9 +68,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ファイルをBufferに変換
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+
+    // OpenAI用のファイルオブジェクトを作成
+    const openaiFile = new File([buffer], file.name, { type: file.type })
+
     // OpenAI Whisper API で文字起こし
     const transcription = await openai.audio.transcriptions.create({
-      file: file,
+      file: openaiFile,
       model: 'whisper-1',
       response_format: 'verbose_json',
       timestamp_granularities: ['segment'],

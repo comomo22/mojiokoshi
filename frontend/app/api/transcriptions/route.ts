@@ -35,11 +35,13 @@ export async function POST(request: NextRequest) {
     // 認証チェック
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
+      console.error('Auth error in POST:', { authError, hasUser: !!user })
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
+    console.log('Auth success in POST:', { userId: user.id })
 
     // FormDataからファイルを取得
     const formData = await request.formData()
@@ -119,7 +121,11 @@ export async function POST(request: NextRequest) {
       language: transcription.language,
     })
   } catch (error) {
-    console.error('Transcription error:', error)
+    console.error('Transcription error:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Transcription failed' },
       { status: 500 }

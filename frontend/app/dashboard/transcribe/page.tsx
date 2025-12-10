@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 type TranscriptionResult = {
   text: string
@@ -19,7 +18,6 @@ export default function TranscribePage() {
   const [result, setResult] = useState<TranscriptionResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
 
   const allowedTypes = [
     'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave',
@@ -81,14 +79,6 @@ export default function TranscribePage() {
     setResult(null)
 
     try {
-      // セッション取得
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        setError('ログインが必要です')
-        setUploading(false)
-        return
-      }
-
       // FormDataでファイルを送信
       const formData = new FormData()
       formData.append('file', file)
@@ -96,11 +86,9 @@ export default function TranscribePage() {
 
       setProgress(10)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/transcriptions/`, {
+      // 内部API Routeを使用（認証はCookieで自動処理）
+      const response = await fetch('/api/transcriptions', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
         body: formData,
       })
 
@@ -108,7 +96,10 @@ export default function TranscribePage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || '文字起こしに失敗しました')
+        if (response.status === 401) {
+          throw new Error('ログインが必要です')
+        }
+        throw new Error(errorData.error || '文字起こしに失敗しました')
       }
 
       const data = await response.json()

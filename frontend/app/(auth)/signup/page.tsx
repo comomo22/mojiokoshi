@@ -1,60 +1,35 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { signup } from './actions'
 
 export default function SignupPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const router = useRouter()
-  const supabase = createClient()
+  const [successEmail, setSuccessEmail] = useState<string | null>(null)
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (formData: FormData) => {
     setLoading(true)
     setError(null)
 
-    if (password !== confirmPassword) {
-      setError('パスワードが一致しません')
-      setLoading(false)
-      return
-    }
+    const result = await signup(formData)
 
-    if (password.length < 6) {
-      setError('パスワードは6文字以上で入力してください')
+    if (result?.error) {
+      setError(result.error)
       setLoading(false)
-      return
-    }
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
-      setSuccess(true)
+    } else if (result?.success) {
+      setSuccessEmail(result.email || '')
     }
   }
 
-  if (success) {
+  if (successEmail) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl text-center">
           <h1 className="text-3xl font-bold mb-4 text-gray-800 dark:text-white">メールを確認してください</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {email} に確認メールを送信しました。<br />
+            {successEmail} に確認メールを送信しました。<br />
             メール内のリンクをクリックして登録を完了してください。
           </p>
           <Link href="/login" className="text-blue-600 hover:underline">
@@ -76,15 +51,15 @@ export default function SignupPage() {
           </div>
         )}
 
-        <form onSubmit={handleSignup} className="space-y-6">
+        <form action={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               メールアドレス
             </label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              autoComplete="email"
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               required
             />
@@ -95,8 +70,8 @@ export default function SignupPage() {
             </label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              autoComplete="new-password"
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               required
               minLength={6}
@@ -108,8 +83,8 @@ export default function SignupPage() {
             </label>
             <input
               type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              name="confirmPassword"
+              autoComplete="new-password"
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               required
             />

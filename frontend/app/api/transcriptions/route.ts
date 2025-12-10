@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import OpenAI from 'openai'
+import OpenAI, { toFile } from 'openai'
 
 // Vercel Serverless Function の設定
 export const maxDuration = 60 // 60秒タイムアウト（Proプラン）
@@ -68,12 +68,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // ファイルをBufferに変換
+    // ファイルをBufferに変換してOpenAI用に整形
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-
-    // OpenAI用のファイルオブジェクトを作成
-    const openaiFile = new File([buffer], file.name, { type: file.type })
+    const openaiFile = await toFile(buffer, file.name, { type: file.type })
 
     // OpenAI Whisper API で文字起こし
     const transcription = await openai.audio.transcriptions.create({

@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import OpenAI, { toFile } from 'openai'
 
-// Vercel Serverless Function の設定
-export const maxDuration = 60 // 60秒タイムアウト（Proプラン）
+// Vercel Serverless Function の設定（Fluid Compute有効時: Hobbyプラン最大300秒）
+export const maxDuration = 120 // 120秒タイムアウト
 export const dynamic = 'force-dynamic'
 
 const openai = new OpenAI({
